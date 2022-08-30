@@ -2,6 +2,10 @@ import threading
 import socket
 import time
 
+global connected
+connected: bool = False
+
+
 user: socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 host: str = socket.gethostbyname(socket.gethostname())
 port: int = 8080
@@ -20,22 +24,28 @@ def loginOrSignup():
             user_response = input().encode()
             user.send(user_response)
 
-  
+connected = loginOrSignup()  
+
+
 def receive():
+    global connected
     print("[USER] - listening to the server now...")
-    while True:
+    while connected:
         msg = user.recv(1024).decode()
-        if msg:
+        if msg == 'DISCONNECTING':
+            connected = False
+        elif msg:
             print(msg)
     
+    
 def write():
+    global connected
     print("[SERVER] - You can start chatting")
-    while True:
+    while connected:
         msg = input().encode()
         user.send(msg)
         
-connected = loginOrSignup()  
-     
+             
 if(connected):
     print("CONNECTED")
     receive_thread = threading.Thread(target=receive)
@@ -46,6 +56,7 @@ if(connected):
 else: 
     user.close()
     print("[SERVER] - Connection refused. Please check your username and password.")
-    # exit(0)
     
+
+
     

@@ -16,26 +16,36 @@ server.listen()
 
 
 def get_help():
+    """This function give the user a description of the chat_room functionality
+       return string describing app functionality.
+    """
     pass
 
-def quit_chat():
-    pass
+def quit_chat(username: str, user: socket, connected: bool):
+    """This function helps a user to quit the chat_room"""
+    user.send('DISCONNECTING'.encode())
+    connected = False
+    user.close()
+
 
 def get_all_connected():
+    """This function give the user a list of all active connected users.
+       return string with all the active connected users.
+    """
     pass
-def send_private_message():
+def private_msg():
     pass
 
 def set_busy(status: bool):
     pass
 
-def ping_username():
+def ping():
     pass
 
-def ban_username():
+def ban():
     pass
 
-def kick_username():
+def kick():
     pass
 
 def broadcast(msg: str):
@@ -52,16 +62,16 @@ def add_active_user(username, user):
     active_users[username] = [(user,), True]
     
 
-keywords =['/private', '/quit', '/connected', '/help', '/busy','/active', '@', '/ban', '/kick']
+keywords =['/private_msg', '/quit_chat', '/get_all_connected', '/get_help', '/set_busy','/active', 'ping', '/ban', '/kick']
 keywords_functions = {
     "get_help": get_help,
     "quit_chat": quit_chat,
     "get_all_connected": get_all_connected,
-    "send_private_message": send_private_message,
-    "set_afk": set_busy,
-    "ping_username": ping_username, 
-    "ban_username": ban_username, 
-    "kick_username": kick_username,
+    "private_msg": private_msg,
+    "set_busy": set_busy,
+    "ping": ping, 
+    "ban": ban, 
+    "kick": kick,
 }
 
 
@@ -100,19 +110,22 @@ def signup_user(user: socket, addr: str):
     
 def handle_user(user: socket, username: str):
     print(f"[SERVER] - Starting to handle {username}")
-    while True:
+    connected: bool = True
+    while connected:
         try: 
             msg: str = user.recv(1024).decode()
             check_for_special_cmd: list = [ele for ele in keywords if (ele in msg)]
-            special_cmd: bool = bool(check_for_special_cmd) 
+            special_cmd: bool = bool(check_for_special_cmd)
             if special_cmd:
-                pass
+                command_to_exec = check_for_special_cmd[0][1:]
+                print(f"command to exec: {command_to_exec}")
+                keywords_functions[command_to_exec](username, user, connected)
             else:
                 broadcast(f"{username}: {msg}")         
         except:
             user.close()
             active_users.pop(username)
-            break
+            connected = False
             
 
 def receive():

@@ -42,8 +42,6 @@ def verify_user_pass(username, password):
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE username=(?)", (username,))
     user = c.fetchone()
-    print(user)
-    print(password)
     verified = False
     if (user != None):
         verified = bcrypt.checkpw(password.encode(), user[1])
