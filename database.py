@@ -10,7 +10,6 @@ c.execute("""CREATE TABLE IF NOT EXISTS users (
                 passw TEXT, 
                 authorization_lvl INTEGER 
         )""")
-    
 
 def add_user(username, passw, authorization_lvl):
     conn = sqlite3.connect('users.db')
@@ -43,7 +42,6 @@ def get_username_auth_lvl(username):
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE username=(?)", (username,))
     user = c.fetchone()
-    print(user)
     auth_lvl = user[2]
     conn.close()
     return auth_lvl
@@ -74,6 +72,21 @@ def username_is_taken(username):
         return True
     return False
 
+def ban_user(username: str):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("UPDATE users SET authorization_lvl= 999 WHERE username=(?)", (username,))
+    conn.commit()
+    c.close()
+    
 
+def set_auth_lvl(username: str, auth_lvl: int):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("UPDATE users SET authorization_lvl=(?) WHERE username=(?)", (auth_lvl, username))
+    conn.commit()
+    c.close()
+    
+    
 
     
